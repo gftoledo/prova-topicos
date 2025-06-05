@@ -36,33 +36,30 @@ app.MapPut("/api/status/{id}", ([FromRoute] int id, [FromBody] Status statusAlte
 
 
 
-//GET/api/tarefas
-app.MapGet("/api/tarefas", ([FromServices] AppDataContext ctx) => 
+// GET /api/tarefas
+app.MapGet("/api/tarefas", ([FromServices] AppDataContext ctx) =>
 {
-    var tarefas = ctx.tarefas.include (t => t.status).toList();
-    Results.Ok(tarefa): Results.NotFound();
+    var tarefas = ctx.Tarefas.Include(p => p.Status).ToList();
+    return tarefas.Any() ? Results.Ok(tarefas) : Results.NotFound();
 });
 
-//GET/api/tarefas/{id}
-app.MapGet("/api/tarefas/{id}",([FromRoute]string id, [FromServices] AppDataContext ctx)=>
+// GET /api/tarefas/{id}
+app.MapGet("/api/tarefas/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
 {
-    var tarefa = ctx.tarefa.find(id);
-    return tarefa == null ?
-    Results.NotFound();
-    Results.Ok(tarefa);
+    var tarefa = ctx.Tarefas.Find(id);
+    return tarefa == null ? Results.NotFound() : Results.Ok(tarefa);
 });
 
 //POST/api/tarefa
-app.MapPost("/api/tarefas", ([FromBody]Tarefa tarefa.[FromServices]AppDataContext ctx )=>
+app.MapPost("/api/tarefas", ([FromBody] Tarefa tarefa, [FromServices] AppDataContext ctx) =>
 {
-    var status = ctx.status.Find(tarefa.status id);
-    if (status == null)return
-    Results.NotFound();
-    tarefa.status =status;
-    ctx.tarefas.add(tarefas);
-    ctx.SaveChanges();
-    return result.Created($"/api/tarefas/{tarefa.id}".tarefa);
+    var status = ctx.Status.Find(tarefa.StatusId);
+    if (status == null) return Results.NotFound();
 
+    tarefa.Status = status;
+    ctx.Tarefas.Add(tarefa);
+    ctx.SaveChanges();
+    return Results.Created($"/api/tarefas/{tarefa.Id}", tarefa);
 });
 
 //PUT/api/tarefas/{id}
@@ -85,14 +82,14 @@ var tarefa = ctx.Tarefas.Find(id);
 });
 
 //DELETE/api/tarefa/{id}
-app.MapDelete("/api/tarefas/{id}", ([FromRoute]string id, [FromServices]AppDataContext ctx)=>
+app.MapDelete("/api/tarefas/{id}", ([FromRoute] string id, [FromServices] AppDataContext ctx) =>
 {
-    var tarefa = ctx.tarefas.Find(id);
+    var tarefa = ctx.Tarefas.Find(id);
     if (tarefa == null) return Results.NotFound();
-    ctx.tarefas.remove(tarefa);
+
+    ctx.Tarefas.Remove(tarefa);
     ctx.SaveChanges();
     return Results.Ok(tarefa);
-
 });
 
 app.Run();
