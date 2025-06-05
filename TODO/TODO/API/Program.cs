@@ -7,6 +7,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 
+// GET /api/status
+app.MapGet("/api/status", ([FromServices] AppDataContext ctx) =>
+{
+    var status = ctx.Status.ToList();
+    return status.Any() ? Results.Ok(status) : Results.NotFound();
+});
+
+// POST /api/status
+app.MapPost("/api/status", ([FromBody] Status status, [FromServices] AppDataContext ctx) =>
+{
+    ctx.Status.Add(status);
+    ctx.SaveChanges();
+    return Results.Created($"/api/status/{status.Id}", status);
+});
+
+// PUT /api/status/{id}
+app.MapPut("/api/status/{id}", ([FromRoute] int id, [FromBody] Status statusAlterado, [FromServices] AppDataContext ctx) =>
+{
+    var status = ctx.Status.Find(id);
+    if (status == null) return Results.NotFound();
+
+    status.Nome = statusAlterado.Nome;
+    ctx.Status.Update(status);
+    ctx.SaveChanges();
+    return Results.Ok(status);
+});
+
 
 
 //GET/api/tarefas
